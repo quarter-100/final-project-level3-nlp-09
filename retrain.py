@@ -56,7 +56,7 @@ with DAG(
     """
     t3 = BashOperator(
         task_id='print_date',
-        bash_command='df -h',
+        bash_command='sudo mount -o remount,size=100G /etc/hosts',
         owner="dain",
         dag=dag
     )

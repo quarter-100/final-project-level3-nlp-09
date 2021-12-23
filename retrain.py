@@ -116,4 +116,4 @@ with DAG(
 
     # 테스크 순서를 정합니다.
     # t1 실행 후 t2를 실행합니다.
-    t3 >> install_requirements >> inference_task1 >> retrain_model >> inference_task2 >> compare_two_models >> branching >> [upload_retrained_model, nothing_happened]
+    inference_task1 >> retrain_model >> inference_task2 >> compare_two_models >> branching >> [upload_retrained_model, nothing_happened]

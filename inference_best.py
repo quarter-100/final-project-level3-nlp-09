@@ -14,7 +14,7 @@ from tqdm import tqdm
 from collections import defaultdict
 import argparse
 
-from model import YesOrNoModel
+#from model import YesOrNoModel
 
 def get_config():
     parser = argparse.ArgumentParser()
@@ -22,12 +22,12 @@ def get_config():
     #path, model option
     parser.add_argument('--seed', type=int, default=42,
                         help='random seed (default: 42)')
-    parser.add_argument('--load_model_path', type=str, default = '/home/dain/final-project-level3-nlp-09/save_model/model_epoch_2.pt', 
-                        help='model save dir path (default : /home/dain/final-project-level3-nlp-09/save_model/model_epoch_2.pt)') 
-    parser.add_argument('--test_path', type= str, default= '/home/dain/final-project-level3-nlp-09/data/inference_sample.csv',
-                        help='train csv path (default: /home/dain/final-project-level3-nlp-09/data/inference_sample.csv')   
-    parser.add_argument('--model_name', type=str, default='rockmiin/ko-boolq-model',
-                        help='model type (default: klue/roberta-large)')
+    #parser.add_argument('--load_model_path', type=str, default = '/opt/ml/yes_no/save_model/model_epoch_2.pt', 
+    #                    help='model save dir path (default : /opt/ml/yes_no/save_model/model_epoch_2.pt)') 
+    parser.add_argument('--test_path', type= str, default= '/opt/ml/yes_no/data/inference_sample.csv',
+                        help='train csv path (default: /opt/ml/yes_no/data/inference_sample.csv')   
+    parser.add_argument('--model_name', type=str, default='quarter100/BoolQ_dain_test',
+                        help='model type (default: quarter100/BoolQ_dain_test)')
     
     args= parser.parse_args()
 
@@ -68,7 +68,7 @@ def inference(data, model, tokenizer):
                 input_ids= tokenized_data['input_ids'][j].unsqueeze(0).to(device),
                 attention_mask= tokenized_data['attention_mask'][j].unsqueeze(0).to(device)
             )
-            logits= outputs
+            logits= outputs['logits']
             logits= F.softmax(logits, dim= -1)
             logits= logits.detach().cpu().numpy()
             prob= logits
@@ -105,8 +105,9 @@ if __name__ == '__main__':
     print(data.isnull().sum())
     print(data.groupby(data['answer']).count())
 
-    model= YesOrNoModel(args.model_name).to(device)
+    #model= YesOrNoModel(args.model_name).to(device)
     #model= torch.load(args.load_model_path, map_location= device)
+    model = AutoModelForSequenceClassification.from_pretrained(args.model_name).to(device)
     tokenizer= AutoTokenizer.from_pretrained(args.model_name)
 
     inference(data, model, tokenizer)

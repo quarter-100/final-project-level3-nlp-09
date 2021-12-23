@@ -39,7 +39,7 @@ with DAG(
     # bash 커맨드로 echo hello 를 실행합니다.
     t1 = BashOperator(
         task_id="print_pwd",
-        bash_command="pwd",
+        bash_command="pip install sklearn",
         owner="dain",  # 이 작업의 오너입니다. 보통 작업을 담당하는 사람 이름을 넣습니다.
         retries=3,  # 이 테스크가 실패한 경우, 3번 재시도 합니다.
         retry_delay=timedelta(minutes=5),  # 재시도하는 시간 간격은 5분입니다.

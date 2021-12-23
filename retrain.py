@@ -37,12 +37,11 @@ with DAG(
     
     # 테스크를 정의합니다.
     # bash 커맨드로 echo hello 를 실행합니다.
-    t1 = BashOperator(
-        task_id="print_pwd",
-        bash_command="pip install sklearn",
+    install_requirements = BashOperator(
+        task_id="install_requirements",
+        bash_command="pip install -r /opt/airflow/dags/requirements.txt",
         owner="dain",  # 이 작업의 오너입니다. 보통 작업을 담당하는 사람 이름을 넣습니다.
-        retries=3,  # 이 테스크가 실패한 경우, 3번 재시도 합니다.
-        retry_delay=timedelta(minutes=5),  # 재시도하는 시간 간격은 5분입니다.
+        dag=dag
     )
     """
     # 테스크를 정의합니다.
@@ -64,7 +63,7 @@ with DAG(
     
     train_task = BashOperator(
         task_id='train_yes_or_no',
-        bash_command='python /tmp/***tmpet26upux/final-project-level3-nlp-09/train.py',
+        bash_command='python /opt/airflow/dags/train.py',
         owner="dain",
         dag=dag
     )
@@ -79,7 +78,7 @@ with DAG(
     retrain_model = BashOperator(
         task_id='retrain_model',
         #bash_command='echo "retrain!!"',
-        bash_command='python /tmp/***tmpet26upux/final-project-level3-nlp-09/train.py',
+        bash_command='python /opt/airflow/dags/train.py',
         owner="dain",
         dag=dag
     )
@@ -87,7 +86,7 @@ with DAG(
 
     inference_task2 = BashOperator(
         task_id='inference_retrained_model',
-        bash_command='python /tmp/***tmpet26upux/final-project-level3-nlp-09/inference_new.py',
+        bash_command='python /opt/airflow/dags/inference_new.py',
         owner="dain",
         dag=dag
     )
@@ -103,7 +102,7 @@ with DAG(
 
     upload_retrained_model = BashOperator(
         task_id='upload_retrained_model',
-        bash_command='python /tmp/***tmpet26upux/final-project-level3-nlp-09/upload_model.py',
+        bash_command='python /opt/airflow/dags/upload_model.py',
         owner="dain",
         dag=dag
     )
@@ -117,4 +116,4 @@ with DAG(
 
     # 테스크 순서를 정합니다.
     # t1 실행 후 t2를 실행합니다.
-    t1 >> inference_task1 >> retrain_model >> inference_task2 >> compare_two_models >> branching >> [upload_retrained_model, nothing_happened]
+    install_requirements >> inference_task1 >> retrain_model >> inference_task2 >> compare_two_models >> branching >> [upload_retrained_model, nothing_happened]

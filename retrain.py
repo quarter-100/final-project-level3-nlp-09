@@ -56,7 +56,7 @@ with DAG(
     """
     t3 = BashOperator(
         task_id='print_date',
-        bash_command='export TMPDIR=$HOME/new/tmp/dir',
+        bash_command='df -h',
         owner="dain",
         dag=dag
     )

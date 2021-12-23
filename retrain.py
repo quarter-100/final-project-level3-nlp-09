@@ -71,7 +71,7 @@ with DAG(
     """
     inference_task1 = BashOperator(
         task_id='inference_best_model',
-        bash_command='python /tmp/***tmpet26upux/final-project-level3-nlp-09/inference_best.py',
+        bash_command='python /opt/airflow/dags/inference_best.py',
         owner="dain",
         dag=dag
     )

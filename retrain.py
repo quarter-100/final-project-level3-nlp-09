@@ -62,23 +62,24 @@ with DAG(
         dag=dag
     )
     
-    t4 = BashOperator(
+    train_task = BashOperator(
         task_id='train_yes_or_no',
-        bash_command='python /opt/ml/yes_no/train.py',
+        bash_command='python /home/dain/final-project-level3-nlp-09/train.py',
         owner="dain",
         dag=dag
     )
     """
     inference_task1 = BashOperator(
         task_id='inference_best_model',
-        bash_command='python /opt/ml/yes_no/inference_best.py',
+        bash_command='python /home/dain/final-project-level3-nlp-09/inference_best.py',
         owner="dain",
         dag=dag
     )
 
     retrain_model = BashOperator(
         task_id='retrain_model',
-        bash_command='echo "retrain!!"',
+        #bash_command='echo "retrain!!"',
+        bash_command='python /home/dain/final-project-level3-nlp-09/train.py',
         owner="dain",
         dag=dag
     )
@@ -86,7 +87,7 @@ with DAG(
 
     inference_task2 = BashOperator(
         task_id='inference_retrained_model',
-        bash_command='python /opt/ml/yes_no/inference_new.py',
+        bash_command='python /home/dain/final-project-level3-nlp-09/inference_new.py',
         owner="dain",
         dag=dag
     )
@@ -102,7 +103,7 @@ with DAG(
 
     upload_retrained_model = BashOperator(
         task_id='upload_retrained_model',
-        bash_command='python /opt/ml/yes_no/upload_model.py',
+        bash_command='python /home/dain/final-project-level3-nlp-09/upload_model.py',
         owner="dain",
         dag=dag
     )

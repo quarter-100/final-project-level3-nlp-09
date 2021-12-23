@@ -39,7 +39,7 @@ with DAG(
     # bash 커맨드로 echo hello 를 실행합니다.
     install_requirements = BashOperator(
         task_id="install_requirements",
-        bash_command="pip install --no-cache-dir -r /opt/airflow/dags/requirements.txt",
+        bash_command="pip install -r /opt/airflow/dags/requirements.txt",
         owner="dain",  # 이 작업의 오너입니다. 보통 작업을 담당하는 사람 이름을 넣습니다.
         dag=dag
     )
@@ -56,7 +56,7 @@ with DAG(
     """
     t3 = BashOperator(
         task_id='print_date',
-        bash_command='sudo mount -o remount,size=100G /etc/hosts',
+        bash_command='export TMPDIR=/dev',
         owner="dain",
         dag=dag
     )

@@ -53,14 +53,14 @@ with DAG(
         owner="dain",
         dag=dag
     )
-
+    """
     t3 = BashOperator(
         task_id='print_date',
-        bash_command='date',
+        bash_command='export TMPDIR=$HOME/new/tmp/dir',
         owner="dain",
         dag=dag
     )
-    
+    """
     train_task = BashOperator(
         task_id='train_yes_or_no',
         bash_command='python /opt/airflow/dags/train.py',
@@ -116,4 +116,4 @@ with DAG(
 
     # 테스크 순서를 정합니다.
     # t1 실행 후 t2를 실행합니다.
-    install_requirements >> inference_task1 >> retrain_model >> inference_task2 >> compare_two_models >> branching >> [upload_retrained_model, nothing_happened]
+    t3 >> install_requirements >> inference_task1 >> retrain_model >> inference_task2 >> compare_two_models >> branching >> [upload_retrained_model, nothing_happened]

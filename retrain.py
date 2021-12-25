@@ -37,10 +37,10 @@ with DAG(
     
     # 테스크를 정의합니다.
     # bash 커맨드로 echo hello 를 실행합니다.
-    install_requirements = BashOperator(
-        task_id="install_requirements",
+    setting = BashOperator(
+        task_id="setting",
         #bash_command="pip install torch",
-        bash_command="pip install -r /opt/airflow/final-project-level3-nlp-09/requirements.txt",
+        bash_command="sh /opt/airflow/final-project-level3-nlp-09/setting.sh",
         owner="dain",  # 이 작업의 오너입니다. 보통 작업을 담당하는 사람 이름을 넣습니다.
         dag=dag
     )
@@ -116,5 +116,5 @@ with DAG(
     # 테스크 순서를 정합니다.
     # t1 실행 후 t2를 실행합니다.
     #install_requirements >> inference_task1 >> retrain_model >> inference_task2 >> compare_two_models >> branching >> [upload_retrained_model, nothing_happened]
-    install_requirements >> upload_retrained_model
+    setting >> upload_retrained_model
     

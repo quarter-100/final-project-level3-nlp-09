@@ -7,7 +7,7 @@ model.push_to_hub(
     "BoolQ_dain_test",
     use_temp_dir=True, 
     organization="quarter100",
-    token = HUGGINGFACE_AUTH_TOKEN
+    use_auth_token = HUGGINGFACE_AUTH_TOKEN
     )
 
 
@@ -16,5 +16,5 @@ tokenizer.push_to_hub(
     "BoolQ_dain_test",
     use_temp_dir=True, 
     organization="quarter100",
-    token = HUGGINGFACE_AUTH_TOKEN
+    use_auth_token = HUGGINGFACE_AUTH_TOKEN
     )

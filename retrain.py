@@ -73,7 +73,7 @@ with DAG(
         owner="dain",
         dag=dag
     )
-
+    """
     retrain_model = BashOperator(
         task_id='retrain_model',
         bash_command='echo "retrain!!"',
@@ -98,7 +98,7 @@ with DAG(
     )
 
     branching = BranchPythonOperator(task_id='choose_branch', python_callable=choose_branch)
-
+    """
     upload_retrained_model = BashOperator(
         task_id='upload_retrained_model',
         bash_command='python /opt/airflow/final-project-level3-nlp-09/upload_model.py',
@@ -115,4 +115,6 @@ with DAG(
 
     # 테스크 순서를 정합니다.
     # t1 실행 후 t2를 실행합니다.
-    install_requirements >> inference_task1 >> retrain_model >> inference_task2 >> compare_two_models >> branching >> [upload_retrained_model, nothing_happened]
+    #install_requirements >> inference_task1 >> retrain_model >> inference_task2 >> compare_two_models >> branching >> [upload_retrained_model, nothing_happened]
+    install_requirements >> inference_task1 >> upload_retrained_model
+    

@@ -18,39 +18,30 @@ from torch.utils.data import TensorDataset, DataLoader
 from datasets import load_metric
 from tqdm import tqdm
 import argparse
+from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score
 
 import wandb
 
 import warnings
 
-from dataset import get_dataset, get_loader
-from model import YesOrNoModel
+from dataset import get_dataset
 
 warnings.filterwarnings("ignore")
-
-"""
-    뭔가 코드적으로 모듈을 나눈다고 가정을 하면..
-    model.py : 이건 뭐 간단하니까..
-    dataset.py : get dataset으로 만들면 될 듯..?
-    train.py
-    inference.py
-"""
 
 def get_config():
     parser = argparse.ArgumentParser()
 
-
     """path, model option"""
     parser.add_argument('--seed', type=int, default=42,
                         help='random seed (default: 42)')
-    parser.add_argument('--save_dir', type=str, default = '/opt/ml/yes_no/save_model', 
-                        help='model save dir path (default : /opt/ml/yes_no/save_model/)')
-    parser.add_argument('--wandb_path', type= str, default= 'YesOrNoModel',
+    parser.add_argument('--save_dir', type=str, default = '/opt/airflow/final-project-level3-nlp-09/save_model', 
+                        help='model save dir path (default : /opt/airflow/final-project-level3-nlp-09/save_model/)')
+    parser.add_argument('--wandb_path', type= str, default= 'YesOrNoModel_for_retrain',
                         help='wandb graph, save_dir basic path (default: YesOrNoModel') 
-    parser.add_argument('--train_path', type= str, default= '/opt/ml/yes_no/data/final_df.csv',
-                        help='train csv path (default: /opt/ml/yes_no/data/final_df.csv')   
-    parser.add_argument('--model_name', type=str, default='klue/roberta-large',
-                        help='model type (default: klue/roberta-large)')
+    parser.add_argument('--train_path', type= str, default= '/opt/airflow/final-project-level3-nlp-09/data/final_df.csv',
+                        help='train csv path (default: /opt/airflow/final-project-level3-nlp-09/data/final_df.csv')   
+    parser.add_argument('--model_name', type=str, default='quarter100/BoolQ_dain_test',
+                        help='model type (default: quarter100/BoolQ_dain_test)')
 
     """hyperparameter"""
     parser.add_argument('--epochs', type=int, default=5,
@@ -59,6 +50,20 @@ def get_config():
                         help='learning rate (default: 1e-5)')
     parser.add_argument('--batch_size', type=int, default=8,
                         help='input batch size for training (default: 32)')
+    parser.add_argument('--gradient_accum', type=int, default=2,
+                        help='gradient accumulation (default: 2)')
+    parser.add_argument('--batch_valid', type=int, default=32,
+                        help='input batch size for validing (default: 32)')
+    parser.add_argument('--eval_steps', type=int, default=300,
+                        help='eval_steps (default: 250)')
+    parser.add_argument('--save_steps', type=int, default=300,
+                        help='save_steps (default: 250)')
+    parser.add_argument('--logging_steps', type=int,
+                        default=100, help='logging_steps (default: 50)')
+    parser.add_argument('--weight_decay', type=float,
+                        default=0.01, help='weight_decay (default: 0.01)')
+    parser.add_argument('--metric_for_best_model', type=str, default='accuracy',
+                        help='metric_for_best_model (default: accuracy')
     
     args= parser.parse_args()
 
@@ -71,101 +76,65 @@ def seed_everything(seed):
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
     torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = True
+    torch.backends.cudnn.benchmark = True 
 
+def compute_metrics(pred):
+    """ validation을 위한 metrics function """
 
-def compute_metrics(pred, labels):
-    predictions= pred
-    predictions = np.argmax(predictions, axis=1)
-    return accuracy_score.compute(predictions=predictions, references=labels)
+    labels = pred.label_ids
+    preds = pred.predictions.argmax(-1)
+    probs = pred.predictions
 
-def train(train_loader, val_loader, model, criterion, optimizer, scheduler, args):
+    acc = accuracy_score(labels, preds) 
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-    for epoch in range(args.epochs):
-        train_loss, train_acc= 0, 0
-        val_loss, val_acc= 0, 0
-        pbar= tqdm(enumerate(train_loader), total= len(train_loader))
-
-        model.train()
-        for idx, data in pbar:
-            labels= data['labels'].to(device)
-            optimizer.zero_grad()
-
-            outputs= model(
-                input_ids= data['input_ids'].to(device),
-                attention_mask= data['attention_mask'].to(device)
-            )
-            
-            loss= criterion(outputs, labels)
-            logits= outputs.detach().cpu()
-
-            acc= compute_metrics(logits, labels)
-            train_loss+= loss.item() / len(data['input_ids'])
-            train_acc+= acc['accuracy']
-
-            loss.backward()
-            optimizer.step()
-            scheduler.step()
-
-        model.eval()
-        with torch.no_grad():
-            val_pbar= tqdm(enumerate(val_loader), total= len(val_loader))
-            for val_idx, data in val_pbar:
-                labels= data['labels'].to(device)
-
-                optimizer.zero_grad()
-
-                outputs= model(
-                    input_ids= data['input_ids'].to(device),
-                    attention_mask= data['attention_mask'].to(device)
-                )
-
-                loss= criterion(outputs, labels)
-                logits= outputs.detach().cpu()
-
-                acc= compute_metrics(logits, labels)
-                val_loss+= loss.item() / len(data['input_ids'])
-                val_acc+= acc['accuracy']
-                
-        train_loss_= train_loss / len(train_loader)
-        train_acc_= train_acc / len(train_loader)
-        val_loss_= val_loss / len(val_loader)
-        val_acc_= val_acc / len(val_loader)
-
-        print(f'epoch: {epoch}, train_loss: {train_loss_}, train_acc: {train_acc_}, \
-            val_loss: {val_loss_}, val_acc: {val_acc_}')
-        
-        wandb.log({'train/accuracy': train_acc_, 'train/loss': train_loss_, 'eval/loss': val_loss_,
-                'eval/accuracy': val_acc_})
-
-        if not os.path.exists(args.save_dir):
-            os.makedirs(args.save_dir)
-        torch.save(model, os.path.join(args.save_dir, f'model_epoch_{epoch}.pt'))
-
-
+    return {
+        'accuracy': acc,
+    }
 
 if __name__ == "__main__":
 
     args= get_config()
+    save_dir= args.save_dir
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     seed_everything(args.seed)
 
-    model= YesOrNoModel(args.model_name)
+    config= AutoConfig.from_pretrained(args.model_name)
+    config.num_labels= 3
+    model= AutoModelForSequenceClassification.from_pretrained(args.model_name, config= config)
     tokenizer= AutoTokenizer.from_pretrained(args.model_name)
     model.to(device)
 
-    criterion= torch.nn.CrossEntropyLoss()
-    optimizer= torch.optim.Adam(model.parameters(), lr= args.lr)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=32, eta_min=args.lr* 0.1)
-
     df= pd.read_csv(args.train_path)
     trainset, valset= get_dataset(df, tokenizer, args)
-    train_loader, val_loader= get_loader(trainset, valset, args)
 
-    accuracy_score = load_metric('accuracy')
+    training_args= TrainingArguments(
+            output_dir= save_dir,
+            save_total_limit= 1,
+            gradient_accumulation_steps= args.gradient_accum,
+            save_steps=args.save_steps,
+            num_train_epochs=args.epochs,
+            learning_rate=args.lr,
+            per_device_train_batch_size=args.batch_size,
+            per_device_eval_batch_size=args.batch_valid,
+            label_smoothing_factor=0.1,
+            logging_dir='./logs',
+            logging_steps=args.logging_steps,
+            metric_for_best_model= args.metric_for_best_model,
+            evaluation_strategy= 'steps',
+            eval_steps= args.eval_steps,
+            load_best_model_at_end=True
+        )
 
-    run= wandb.init(project= 'yesorno', entity= 'quarter100', name= 'dain_test')
-    train(train_loader, val_loader, model,criterion, optimizer, scheduler, args)
+    trainer= Trainer(
+                model= model,
+                args= training_args,
+                train_dataset= trainset,
+                eval_dataset= valset,
+                compute_metrics= compute_metrics
+            )
+    trainer.save_model()  # Saves the tokenizer too for easy upload
+
+    run= wandb.init(project= 'yesorno', entity= 'quarter100', name= args.wandb_path)
+    trainer.train()
     run.finish()

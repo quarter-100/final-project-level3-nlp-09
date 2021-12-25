@@ -1,19 +1,20 @@
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
-import torch
 
-#HUGGINGFACE_AUTH_TOKEN = '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'
+HUGGINGFACE_AUTH_TOKEN = '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'
 
-model = AutoModelForSequenceClassification.from_pretrained('rockmiin/ko-boolq-model')
+model = AutoModelForSequenceClassification.from_pretrained('quarter100/BoolQ_dain_test')
 model.push_to_hub(
     "BoolQ_dain_test",
     use_temp_dir=True, 
-    organization="quarter100"
+    organization="quarter100",
+    token = HUGGINGFACE_AUTH_TOKEN
     )
 
 
-tokenizer = AutoTokenizer.from_pretrained('rockmiin/ko-boolq-model')
+tokenizer = AutoTokenizer.from_pretrained('quarter100/BoolQ_dain_test')
 tokenizer.push_to_hub(
     "BoolQ_dain_test",
     use_temp_dir=True, 
-    organization="quarter100"
+    organization="quarter100",
+    token = HUGGINGFACE_AUTH_TOKEN
     )

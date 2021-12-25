@@ -40,7 +40,7 @@ with DAG(
     setting = BashOperator(
         task_id="setting",
         #bash_command="pip install torch",
-        bash_command="sh /opt/airflow/final-project-level3-nlp-09/setting.sh",
+        bash_command="sh /opt/airflow/final-project-level3-nlp-09/setting.sh ",
         owner="dain",  # 이 작업의 오너입니다. 보통 작업을 담당하는 사람 이름을 넣습니다.
         dag=dag
     )

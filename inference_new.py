@@ -22,8 +22,8 @@ def get_config():
     """path, model option"""
     parser.add_argument('--seed', type=int, default=42,
                         help='random seed (default: 42)')
-    parser.add_argument('--load_model_path', type=str, default = '/home/dain/final-project-level3-nlp-09/save_model', 
-                        help='model save dir path (default : /home/dain/final-project-level3-nlp-09/save_model)') 
+    parser.add_argument('--load_model_path', type=str, default = '/home/dain/airflow_no_docker/save_model', 
+                        help='model save dir path (default : /home/dain/airflow_no_docker/save_model)') 
     parser.add_argument('--test_path', type= str, default= '/home/dain/final-project-level3-nlp-09/data/inference_sample.csv',
                         help='train csv path (default: /home/dain/final-project-level3-nlp-09/data/inference_sample.csv')   
     parser.add_argument('--model_name', type=str, default='quarter100/BoolQ_dain_test',

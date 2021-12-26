@@ -34,8 +34,8 @@ def get_config():
     """path, model option"""
     parser.add_argument('--seed', type=int, default=42,
                         help='random seed (default: 42)')
-    parser.add_argument('--save_dir', type=str, default = '/home/dain/final-project-level3-nlp-09/save_model', 
-                        help='model save dir path (default : /home/dain/final-project-level3-nlp-09/save_model/)')
+    parser.add_argument('--save_dir', type=str, default = '/home/dain/airflow_no_docker/save_model', 
+                        help='model save dir path (default : /home/dain/airflow_no_docker/save_model/)')
     parser.add_argument('--wandb_path', type= str, default= 'YesOrNoModel_for_retrain',
                         help='wandb graph, save_dir basic path (default: YesOrNoModel') 
     parser.add_argument('--train_path', type= str, default= '/home/dain/final-project-level3-nlp-09/data/final_df.csv',

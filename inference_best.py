@@ -24,8 +24,8 @@ def get_config():
                         help='random seed (default: 42)')
     #parser.add_argument('--load_model_path', type=str, default = '/opt/ml/yes_no/save_model/model_epoch_2.pt', 
     #                    help='model save dir path (default : /opt/ml/yes_no/save_model/model_epoch_2.pt)') 
-    parser.add_argument('--test_path', type= str, default= '/opt/airflow/final-project-level3-nlp-09/data/inference_sample.csv',
-                        help='train csv path (default: /opt/airflow/final-project-level3-nlp-09/data/inference_sample.csv')   
+    parser.add_argument('--test_path', type= str, default= '/home/dain/final-project-level3-nlp-09/data/inference_sample.csv',
+                        help='train csv path (default: /home/dain/final-project-level3-nlp-09/data/inference_sample.csv')   
     parser.add_argument('--model_name', type=str, default='quarter100/BoolQ_dain_test',
                         help='model type (default: quarter100/BoolQ_dain_test)')
     
